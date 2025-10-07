@@ -95,16 +95,20 @@ try {
     console.log('Error sending to Google Sheets:', error);
             }
             
-            // Show success message
-            document.getElementById('message').innerHTML = `
-                <div class="bg-green-50 border border-green-200 text-green-800 p-6 rounded-lg">
-                    <div class="text-center">
-                        <div class="text-4xl mb-2">✅</div>
-                        <h3 class="font-bold text-lg mb-2">Registration Successful!</h3>
-                        <p>Thank you, ${formData.firstName}! We'll contact you soon with your career matches.</p>
-                    </div>
-                </div>
-            `;
+           // Show success message with assessment link
+document.getElementById('message').innerHTML = `
+    <div class="bg-green-50 border border-green-200 text-green-800 p-6 rounded-lg">
+        <div class="text-center">
+            <div class="text-4xl mb-2">✅</div>
+            <h3 class="font-bold text-lg mb-2">Registration Successful!</h3>
+            <p class="mb-4">Thank you, ${formData.firstName}! Now let's find your perfect career match.</p>
+            <a href="assessment.html?firstName=${encodeURIComponent(formData.firstName)}&lastName=${encodeURIComponent(formData.lastName)}&email=${encodeURIComponent(formData.email)}&phone=${encodeURIComponent(formData.phone)}&zipCode=${encodeURIComponent(formData.zipCode)}" 
+               class="inline-block bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all">
+                Start Career Assessment →
+            </a>
+        </div>
+    </div>
+`;
             
             document.getElementById('registrationForm').reset();
         });
