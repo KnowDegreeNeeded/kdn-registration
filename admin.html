@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - KDN Registrations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+                    <p class="text-gray-600">KDN Registration Data</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-amber-600" id="totalCount">0</div>
+                    <div class="text-sm text-gray-500">Total Registrations</div>
+                </div>
+            </div>
+            
+            <div class="mb-6 flex space-x-4">
+                <button onclick="exportCSV()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
+                    📥 Export to CSV
+                </button>
+                <button onclick="clearData()" class="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700">
+                    🗑️ Clear All Data
+                </button>
+            </div>
+            
+            <div id="userTable"></div>
+        </div>
+    </div>
+    
+    <script>
+        function loadUsers() {
+            const users = JSON.parse(localStorage.getItem('kdn_users') || '[]');
+            document.getElementById('totalCount').textContent = users.length;
+            
+            if (users.length === 0) {
+                document.getElementById('userTable').innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <div class="text-6xl mb-4">📭</div>
+                        <p>No registrations yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const tableHTML = `
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Zip Code</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${users.map((user, index) => `
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${user.firstName} ${user.lastName}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${user.email}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${user.phone || 'N/A'}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${user.zipCode}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${new Date(user.registeredAt).toLocaleDateString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('userTable').innerHTML = tableHTML;
+        }
+        
+        function exportCSV() {
+            const users = JSON.parse(localStorage.getItem('kdn_users') || '[]');
+            
+            if (users.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Zip Code', 'Registered At'];
+            const csv = [
+                headers.join(','),
+                ...users.map(u => [
+                    u.firstName,
+                    u.lastName,
+                    u.email,
+                    u.phone || '',
+                    u.zipCode,
+                    u.registeredAt
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `kdn-registrations-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+        
+        function clearData() {
+            if (confirm('Are you sure you want to delete all registrations? This cannot be undone.')) {
+                localStorage.removeItem('kdn_users');
+                loadUsers();
+            }
+        }
+        
+        loadUsers();
+    </script>
+</body>
+</html>
